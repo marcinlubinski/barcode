@@ -1,3 +1,5 @@
+'use strict';
+
 var barcode = function() {
 
 	var localMediaStream = null;
@@ -56,9 +58,12 @@ var barcode = function() {
 		canvas: '',
 		canvasg: ''
 	}
+	var devices = null
+
+var videoElement = null
+var videoSelect = null
 
 	function init() {
-
 		window.URL = window.URL || window.webkitURL;
 		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
@@ -68,15 +73,22 @@ var barcode = function() {
 		elements.canvasg = document.querySelector(config.canvasg);
 		elements.ctxg = elements.canvasg.getContext('2d');
 
-		if (navigator.getUserMedia) {
-			navigator.mediaDevices.getUserMedia({audio: false, video: true})
-			.then(stream => {
-				elements.video.srcObject = stream;
-			})
-			.catch(error => {
-				console.log(error);
-			})
-		}
+		videoElement = document.querySelector('video');
+		videoSelect = document.querySelector('select#videoSource');
+
+		// if (navigator.getUserMedia) {
+		// 	navigator.mediaDevices.getUserMedia({audio: false, video: true})
+		// 	.then(stream => {
+		// 		elements.video.srcObject = stream;
+		// 		devices = navigator.mediaDevices.enumerateDevices();
+		// console.log(devices)
+		// 	})
+		// 	.catch(error => {
+		// 		console.log(error);
+		// 	})
+		// }
+		getStream().then(getDevices).then(gotDevices);
+		
 
 		elements.video.addEventListener('canplay', (e) => {
 
@@ -97,6 +109,57 @@ var barcode = function() {
 		}, false);
 	}
 
+
+// audioSelect.onchange = getStream;
+// videoSelect.onchange = getStream;
+
+
+
+function getDevices() {
+  // AFAICT in Safari this only gets default devices until gUM is called :/
+  return navigator.mediaDevices.enumerateDevices();
+}
+
+function gotDevices(deviceInfos) {
+  window.deviceInfos = deviceInfos; // make available to console
+  console.log('Available input and output devices:', deviceInfos);
+  for (const deviceInfo of deviceInfos) {
+    const option = document.createElement('option');
+    option.value = deviceInfo.deviceId;
+    if (deviceInfo.kind === 'videoinput') {
+      option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+      videoSelect.appendChild(option);
+    }
+  }
+}
+
+function getStream() {
+  if (window.stream) {
+    window.stream.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
+	console.log(videoSelect)
+  const videoSource = videoSelect.value;
+  const constraints = {
+    video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+  };
+  return navigator.mediaDevices.getUserMedia(constraints).
+    then(gotStream).catch(handleError);
+}
+
+function gotStream(stream) {
+  window.stream = stream; // make stream available to console
+  videoSelect.selectedIndex = [...videoSelect.options].
+    findIndex(option => option.text === stream.getVideoTracks()[0].label);
+  videoElement.srcObject = stream;
+}
+
+function handleError(error) {
+  console.error('Error: ', error);
+}
+
+
 	function snapshot() {
 		elements.ctx.drawImage(elements.video, 0, 0, dimensions.width, dimensions.height);
 		processImage();		
@@ -111,7 +174,6 @@ var barcode = function() {
 		var pixelBars = [];
 
 		// convert to grayscale
- 
 		var imgd = elements.ctx.getImageData(dimensions.start, dimensions.height * 0.5, dimensions.end - dimensions.start, 1);
 		var rgbpixels = imgd.data;
 

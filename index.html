@@ -10,7 +10,6 @@
 const sound = new Audio("barcode.wav");
 
 $(document).ready(() => {
-
 	barcode.config.start = 0.1;
 	barcode.config.end = 0.9;
 	barcode.config.video = '#barcodevideo';
@@ -20,9 +19,10 @@ $(document).ready(() => {
 		$('#result').html(barcode);
 	});
 	barcode.init();
-
-	$('#result').bind('DOMSubtreeModified', (e) => {
-		sound.play();	
+	console.log('dupa')
+	
+	$('#result').bind('MutationObserver', (e) => {
+		sound.play();
 	});
 
 });
@@ -32,12 +32,16 @@ $(document).ready(() => {
 </head>
 <body>
 
+	<div class="select">
+    <label for="videoSource">Video source: </label><select id="videoSource"></select>
+  </div>
 <div id="barcode">
 	<video id="barcodevideo" autoplay></video>
 	<canvas id="barcodecanvasg" ></canvas>
 </div>
 <canvas id="barcodecanvas" ></canvas>
 <div id="result"></div>
+
 
 </body>
 </html>
