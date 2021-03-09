@@ -1,4 +1,3 @@
-'use strict';
 
 var barcode = function() {
 
@@ -60,43 +59,39 @@ var barcode = function() {
 	}
 	var devices = null
 
-var videoElement = null
-var videoSelect = null
+var videoElement = document.querySelector('video');
+var videoSelect = document.querySelector('select#videoSource');
+videoSelect.onchange = getStream;
+function init() {
+	window.URL = window.URL || window.webkitURL;
+	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-	function init() {
-		window.URL = window.URL || window.webkitURL;
-		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+	elements.video = document.querySelector(config.video);
+	elements.canvas = document.querySelector(config.canvas);
+	elements.ctx = elements.canvas.getContext('2d');
+	elements.canvasg = document.querySelector(config.canvasg);
+	elements.ctxg = elements.canvasg.getContext('2d');
 
-		elements.video = document.querySelector(config.video);
-		elements.canvas = document.querySelector(config.canvas);
-		elements.ctx = elements.canvas.getContext('2d');
-		elements.canvasg = document.querySelector(config.canvasg);
-		elements.ctxg = elements.canvasg.getContext('2d');
+	getStream().then(getDevices).then(gotDevices);
 
-		videoElement = document.querySelector('video');
-		videoSelect = document.querySelector('select#videoSource');
+	elements.video.addEventListener('canplay', (e) => {
 
-		videoSelect.addEventListener('change', getStream())
-		getStream().then(getDevices).then(gotDevices);
+		dimensions.height = elements.video.videoHeight;
+		dimensions.width = elements.video.videoWidth;
 
-		elements.video.addEventListener('canplay', (e) => {
+		dimensions.start = dimensions.width * config.start;
+		dimensions.end = dimensions.width * config.end;
 
-			dimensions.height = elements.video.videoHeight;
-			dimensions.width = elements.video.videoWidth;
+		elements.canvas.width = dimensions.width;
+		elements.canvas.height = dimensions.height;
+		elements.canvasg.width = dimensions.width;
+		elements.canvasg.height = dimensions.height;
 
-			dimensions.start = dimensions.width * config.start;
-			dimensions.end = dimensions.width * config.end;
+		drawGraphics();
+		setInterval(function(){snapshot()}, config.delay);
 
-			elements.canvas.width = dimensions.width;
-			elements.canvas.height = dimensions.height;
-			elements.canvasg.width = dimensions.width;
-			elements.canvasg.height = dimensions.height;
-
-			drawGraphics();
-			setInterval(function(){snapshot()}, config.delay);
-
-		}, false);
-	}
+	}, false);
+}
 
 function getDevices() {
   // AFAICT in Safari this only gets default devices until gUM is called :/
