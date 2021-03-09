@@ -76,6 +76,7 @@ var videoSelect = null
 		videoElement = document.querySelector('video');
 		videoSelect = document.querySelector('select#videoSource');
 
+		videoSelect.addEventListener('change', getStream())
 		getStream().then(getDevices).then(gotDevices);
 
 		elements.video.addEventListener('canplay', (e) => {
