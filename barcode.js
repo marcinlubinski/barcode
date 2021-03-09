@@ -1,7 +1,6 @@
 
 var barcode = function() {
 
-	var localMediaStream = null;
 	var bars = [];
 	var handler = null;
 
@@ -51,21 +50,31 @@ var barcode = function() {
 		start: 0.1,
 		end: 0.9,
 		threshold: 160,
-		quality: 0.45,
+		quality: 0.70,
 		delay: 100,
 		video: '',
 		canvas: '',
 		canvasg: ''
 	}
-	var devices = null
+
+	const sound = new Audio("barcode.wav");
+	$('#result').bind('DOMSubtreeModified', (e) => {
+		if (e.currentTarget.innerHTML) {
+			sound.play();
+		}
+		// setTimeout(() => {
+		// 	$('#result').html('');
+		// }, 5000);
+	});
 
 var videoElement = document.querySelector('video');
 var videoSelect = document.querySelector('select#videoSource');
 videoSelect.onchange = getStream;
+
+
 function init() {
 	window.URL = window.URL || window.webkitURL;
 	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
 	elements.video = document.querySelector(config.video);
 	elements.canvas = document.querySelector(config.canvas);
 	elements.ctx = elements.canvas.getContext('2d');
@@ -74,7 +83,7 @@ function init() {
 
 	getStream().then(getDevices).then(gotDevices);
 
-	elements.video.addEventListener('canplay', (e) => {
+		elements.video.addEventListener('canplay', (e) => {
 
 		dimensions.height = elements.video.videoHeight;
 		dimensions.width = elements.video.videoWidth;
@@ -89,7 +98,6 @@ function init() {
 
 		drawGraphics();
 		setInterval(function(){snapshot()}, config.delay);
-
 	}, false);
 }
 
@@ -100,7 +108,6 @@ function getDevices() {
 
 function gotDevices(deviceInfos) {
   window.deviceInfos = deviceInfos; // make available to console
-  console.log('Available input and output devices:', deviceInfos);
   for (const deviceInfo of deviceInfos) {
     const option = document.createElement('option');
     option.value = deviceInfo.deviceId;
@@ -117,7 +124,6 @@ function getStream() {
       track.stop();
     });
   }
-	console.log(videoSelect)
   const videoSource = videoSelect.value;
   const constraints = {
     video: {deviceId: videoSource ? {exact: videoSource} : undefined}
@@ -213,7 +219,7 @@ function handleError(error) {
 			}
 		}
 
-		console.log("startIndex: " + startIndex );
+		// console.log("startIndex: " + startIndex );
 
 		// return if no starting sequence found
 
@@ -225,7 +231,7 @@ function handleError(error) {
 
 		pixelBars = pixelBars.slice(startIndex, startIndex + 3 + 24 + 5 + 24 + 3);
 
-		console.log("pixelBars: " + pixelBars );
+		// console.log("pixelBars: " + pixelBars );
 
 		// calculate relative widths
 
@@ -245,7 +251,7 @@ function handleError(error) {
 
 		console.clear();
 
-		console.log("analyzing");
+		// console.log("analyzing");
 
 		// determine parity first digit and reverse sequence if necessary
 
@@ -255,7 +261,6 @@ function handleError(error) {
 		}
 
 		// split into digits
-
 		var digits = [
 			normalize(bars.slice(3, 3 + 4), 7),
 			normalize(bars.slice(7, 7 + 4), 7),
@@ -271,7 +276,7 @@ function handleError(error) {
 			normalize(bars.slice(52, 52 + 4), 7)
 		]
 
-		console.log("digits: " + digits);
+		// console.log("digits: " + digits);
 
 		// determine parity and reverse if necessary
 
@@ -310,7 +315,7 @@ function handleError(error) {
 		
 		}
 
-		console.log("result: " + result);	
+		// console.log("result: " + result);	
 
 		// check digit
 		
@@ -318,10 +323,9 @@ function handleError(error) {
 
 		// output
 
-		console.log("quality: " + quality);
-
+		// console.log("quality: " + quality);
 		if(quality < config.quality) {
-			if (handler != null) {
+			if (handler != null && checkDigit) {
 				handler(checkDigit + result.join(''));
 			}
 		}

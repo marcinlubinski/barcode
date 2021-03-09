@@ -6,7 +6,7 @@
 
 <script type="text/javascript">
 
-const sound = new Audio("barcode.wav");
+
 
 $(document).ready(() => {
 	barcode.config.start = 0.1;
@@ -18,11 +18,6 @@ $(document).ready(() => {
 		$('#result').html(barcode);
 	});
 	barcode.init();
-	
-	$('#result').bind('DOMContentLoaded', (e) => {
-		sound.play();
-	});
-
 });
 
 </script>
