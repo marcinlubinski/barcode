@@ -51,7 +51,7 @@ var barcode = function() {
 		end: 0.9,
 		threshold: 160,
 		quality: 0.70,
-		delay: 100,
+		delay: 120,
 		video: '',
 		canvas: '',
 		canvasg: ''
