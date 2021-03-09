@@ -76,19 +76,7 @@ var videoSelect = null
 		videoElement = document.querySelector('video');
 		videoSelect = document.querySelector('select#videoSource');
 
-		// if (navigator.getUserMedia) {
-		// 	navigator.mediaDevices.getUserMedia({audio: false, video: true})
-		// 	.then(stream => {
-		// 		elements.video.srcObject = stream;
-		// 		devices = navigator.mediaDevices.enumerateDevices();
-		// console.log(devices)
-		// 	})
-		// 	.catch(error => {
-		// 		console.log(error);
-		// 	})
-		// }
 		getStream().then(getDevices).then(gotDevices);
-		
 
 		elements.video.addEventListener('canplay', (e) => {
 
@@ -108,12 +96,6 @@ var videoSelect = null
 
 		}, false);
 	}
-
-
-// audioSelect.onchange = getStream;
-// videoSelect.onchange = getStream;
-
-
 
 function getDevices() {
   // AFAICT in Safari this only gets default devices until gUM is called :/

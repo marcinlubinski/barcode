@@ -19,7 +19,6 @@ $(document).ready(() => {
 		$('#result').html(barcode);
 	});
 	barcode.init();
-	console.log('dupa')
 	
 	$('#result').bind('MutationObserver', (e) => {
 		sound.play();
